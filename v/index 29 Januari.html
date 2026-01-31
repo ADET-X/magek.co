@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch on doodsadt</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #fff; color: #000; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #ddd; }
+    .navbar .logo { font-weight: bold; font-size: 22px; }
+    .player-container { width: 100%; height: 60vh; background: #000; display: flex; align-items: center; justify-content: center; }
+    video, iframe { width: 100%; height: 100%; background: #000; border: none; }
+    .btn { display: block; width: 200px; margin: 20px auto; padding: 10px; background: #444; color: #fff; text-align: center; text-decoration: none; border-radius: 6px; font-size: 16px; }
+    .btn:hover { background: #222; }
+    .info { text-align:center; padding: 12px; color:#444; }
+    @media (max-width: 768px) {
+      .player-container { height: 40vh; }
+    }
+  </style>
+  
+  <script
+  type="text/javascript"
+  src="//pl27233219.effectivegatecpm.com/77/33/2d/77332d0ff403f429ea264fa9f3e1c873.js"
+></script>
+  
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">doodsadt</div>
+    <div class="nav-btns">
+      <a href="../index.html" class="btn" style="width:auto;margin:0;">Upload</a>
+    </div>
+  </div>
+
+  <div class="player-container" id="playerWrap">
+    <video id="videoPlayer" controls autoplay playsinline></video>
+  </div>
+
+  <div class="info" id="infoText"></div>
+  <!-- tombol tambahan -->
+  <a href="https://biteanxiously.com/urr55f55?key=50d713c23cd1e3e609f75fd8f6658bd7" target="_blank" class="btn">DOWNLOAD</a>
+
+  <script>
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      let id = params.get("id"); 
+      const player = document.getElementById("videoPlayer");
+      const wrap = document.getElementById("playerWrap");
+      const info = document.getElementById("infoText");
+
+      if (id) {
+        if (!id.endsWith(".mp4")) {
+          id += ".mp4";
+        }
+        const videoUrl = `https://cdn.videy.co/${id}`;
+        player.src = videoUrl;
+        info.innerHTML = '<a href="https://t.me/+q9m6olHeqv81MTM1" target="_blank" class="btn">Join Group</a>';
+
+        // kalau error, fallback ke iframe
+        player.addEventListener('error', function(){
+          wrap.innerHTML = `<iframe src="${videoUrl}" allowfullscreen></iframe>`;
+          info.innerHTML = '<a href="https://t.me/+q9m6olHeqv81MTM1" target="_blank" class="btn">Join Group</a>';
+        });
+      } else {
+        wrap.innerHTML =
+          "<h2 style='color:white;text-align:center;'>No video ID found</h2>";
+      }
+    })();
+  </script>
+  
+  <script
+  type="text/javascript"
+  src="https://pl27234599.effectivegatecpm.com/9d/57/af/9d57af6c0e99a9a74ef63b1eb4b0fc95.js"
+></script>
+  
+</body>
+</html>
