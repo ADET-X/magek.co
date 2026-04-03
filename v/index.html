@@ -3,72 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Watch on magek</title>
-  
-  <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="431513"></script>
-  
+  <title>Watch</title>
+
+  <!-- WPAdManager Script 1 -->
+  <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="434797"></script>
+
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #fff; color: #000; }
-    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #ddd; }
-    .navbar .logo { font-weight: bold; font-size: 22px; }
-    .player-container { width: 100%; height: 60vh; background: #000; display: flex; align-items: center; justify-content: center; }
-    video, iframe { width: 100%; height: 100%; background: #000; border: none; }
-    .btn { display: block; width: 200px; margin: 20px auto; padding: 10px; background: #444; color: #fff; text-align: center; text-decoration: none; border-radius: 6px; font-size: 16px; }
-    .btn:hover { background: #222; }
-    .info { text-align:center; padding: 12px; color:#444; }
-    @media (max-width: 768px) {
-      .player-container { height: 40vh; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+    }
+
+    video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
     }
   </style>
-  
-  <script src="https://pl28621897.effectivegatecpm.com/ee/fa/6a/eefa6abdbef887b7011f573f0fc7b33c.js"></script>
-  
 </head>
+
 <body>
-  <div class="navbar">
-    <div class="logo">magek</div>
-    <div class="nav-btns">
-      <a href="../index.html" class="btn" style="width:auto;margin:0;">Upload</a>
-    </div>
-  </div>
 
-  <div class="player-container" id="playerWrap">
-    <video id="videoPlayer" controls autoplay playsinline></video>
-  </div>
-
-  <div class="info" id="infoText"></div>
-  <!-- tombol tambahan -->
-  <a href="https://biteanxiously.com/urr55f55?key=50d713c23cd1e3e609f75fd8f6658bd7" target="_blank" class="btn">DOWNLOAD</a>
+  <video id="video" playsinline preload="metadata" controls></video>
 
   <script>
-    (function(){
+    (function () {
       const params = new URLSearchParams(window.location.search);
-      let id = params.get("id"); 
-      const player = document.getElementById("videoPlayer");
-      const wrap = document.getElementById("playerWrap");
-      const info = document.getElementById("infoText");
+      let id = params.get("id");
 
-      if (id) {
-        if (!id.endsWith(".mp4")) {
-          id += ".mp4";
-        }
-        const videoUrl = `https://cdn.videy.co/${id}`;
-        player.src = videoUrl;
-        info.innerHTML = '<a href="https://t.me/+q9m6olHeqv81MTM1" target="_blank" class="btn">Join Group</a>';
+      if (!id) return;
 
-        // kalau error, fallback ke iframe
-        player.addEventListener('error', function(){
-          wrap.innerHTML = `<iframe src="${videoUrl}" allowfullscreen></iframe>`;
-          info.innerHTML = '<a href="https://t.me/+q9m6olHeqv81MTM1" target="_blank" class="btn">Join Group</a>';
-        });
-      } else {
-        wrap.innerHTML =
-          "<h2 style='color:white;text-align:center;'>No video ID found</h2>";
+      if (!id.toLowerCase().endsWith(".mp4")) {
+        id += ".mp4";
       }
+
+      document.getElementById("video").src =
+        "https://cdn.videy.co/" + id;
     })();
   </script>
-  
-  <script src="https://pl28621906.effectivegatecpm.com/d5/e2/f5/d5e2f59f7e4293d2f36a0c1cfde01156.js"></script>
-  
+
 </body>
 </html>
