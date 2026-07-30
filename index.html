@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Videy Clone - Secure Storage.to</title>
+    <title>Videy Clone - Storage.to</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col items-center p-4">
 
     <!-- Navbar Minimalis -->
-    <div class="w-full max-w-3xl mb-4 flex justify-between items-center">
+    <div class="w-full max-w-3xl mb-8 mt-4 flex justify-between items-center">
         <h1 class="text-2xl font-extrabold tracking-tight">videy<span class="text-blue-600">clone</span></h1>
-        <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-bold transition">Upload Baru</a>
+        <a href="/" class="bg-white border hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-bold shadow-sm transition">Upload Baru</a>
     </div>
 
     <!-- Container Utama -->
-    <div id="app" class="w-full max-w-3xl bg-white p-8 rounded-xl shadow-lg text-center">
-        <!-- Konten akan di-inject oleh JavaScript -->
+    <div id="app" class="w-full max-w-3xl bg-white p-8 rounded-xl shadow-md text-center">
+        <!-- Konten di-inject via JS -->
     </div>
 
     <script>
-        // --- SISTEM AUTENTIKASI ANONIM AMAN ---
+        // --- KONFIGURASI AUTENTIKASI ---
         
         // 1. Dapatkan atau Buat Visitor Token
         let visitorToken = localStorage.getItem('visitor_token');
         if (!visitorToken) {
-            // Generate random string sesuai dokumentasi
             visitorToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             localStorage.setItem('visitor_token', visitorToken);
         }
@@ -35,7 +34,9 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // TAMPILKAN VIDEO
+            // ==========================================
+            // TAMPILAN PEMUTAR VIDEO
+            // ==========================================
             appDiv.innerHTML = `
                 <div class="relative w-full rounded-lg overflow-hidden bg-black shadow-inner pb-[56.25%] h-0">
                     <iframe src="https://storage.to/${videoId}" 
@@ -44,24 +45,27 @@
                     </iframe>
                 </div>
                 <div class="mt-6 flex justify-center gap-4">
-                    <button onclick="copyCurrentUrl()" class="bg-blue-100 text-blue-700 px-6 py-2 rounded-md font-bold hover:bg-blue-200 transition">
+                    <button onclick="copyCurrentUrl()" class="bg-blue-600 text-white px-6 py-2 rounded-md font-bold hover:bg-blue-700 transition shadow-sm">
                         Copy Link Video
                     </button>
                 </div>
             `;
         } else {
-            // TAMPILKAN FORM UPLOAD
+            // ==========================================
+            // TAMPILAN FORM UPLOAD & RIWAYAT
+            // ==========================================
             appDiv.innerHTML = `
-                <div class="py-10 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 mb-6">
+                <!-- Area Upload -->
+                <div class="py-10 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/50 mb-6 transition-all hover:bg-blue-50">
                     <h2 class="mt-2 text-xl font-bold text-gray-700">Pilih Video</h2>
-                    <p class="text-sm text-gray-500 mb-4">Upload aman (Maks 50MB per file)</p>
+                    <p class="text-sm text-gray-500 mb-4">Maksimal 50MB (Mode Anonim Aman)</p>
                     
                     <input type="file" id="fileInput" accept="video/mp4,video/webm" class="block w-full max-w-xs mx-auto text-sm text-gray-500
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100 cursor-pointer" />
+                        file:bg-blue-100 file:text-blue-700
+                        hover:file:bg-blue-200 cursor-pointer" />
                 </div>
                 
                 <button id="uploadBtn" onclick="mulaiUpload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 w-full font-bold transition-all text-lg shadow-md">
@@ -74,12 +78,24 @@
                     <p class="text-green-800 font-bold mb-2">✅ Video Berhasil Diunggah!</p>
                     <div class="flex gap-2">
                         <input type="text" id="shareLink" class="w-full p-2 border border-green-300 rounded bg-white text-gray-700 font-mono text-sm outline-none" readonly />
-                        <button onclick="copyLink()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-bold transition whitespace-nowrap">Salin</button>
+                        <button onclick="copyLink()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-bold transition whitespace-nowrap shadow-sm">Salin</button>
+                    </div>
+                </div>
+
+                <!-- Area Riwayat Video -->
+                <div class="mt-12 text-left">
+                    <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Riwayat Video Saya</h3>
+                    <div id="historyTable" class="overflow-x-auto">
+                        <!-- Tabel di-inject via JS renderHistory() -->
                     </div>
                 </div>
             `;
+            renderHistory();
         }
 
+        // ==========================================
+        // FUNGSI UPLOAD (3 TAHAP STORAGE.TO)
+        // ==========================================
         async function mulaiUpload() {
             const fileInput = document.getElementById('fileInput');
             const statusText = document.getElementById('statusText');
@@ -95,7 +111,7 @@
             const file = fileInput.files[0];
             
             if (file.size > 50 * 1024 * 1024) {
-                alert('Maksimal 50MB untuk mencegah mode multipart otomatis.');
+                alert('Ukuran file maksimal 50MB.');
                 return;
             }
 
@@ -105,14 +121,14 @@
             uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
             try {
-                // TAHAP 1: INIT (Menggunakan Visitor Token)
-                statusText.innerText = "Langkah 1/3: Meminta URL Upload (Init)...";
+                // TAHAP 1: INIT (Menggunakan Proxy untuk hindari CORS Browser ke API Storage.to)
+                statusText.innerText = "Langkah 1/3: Meminta akses server...";
                 const initUrl = encodeURIComponent('https://storage.to/api/upload/init');
                 const initRes = await fetch(`https://corsproxy.io/?${initUrl}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Visitor-Token': visitorToken // Otorisasi Anonim
+                        'X-Visitor-Token': visitorToken
                     },
                     body: JSON.stringify({
                         filename: file.name,
@@ -124,20 +140,18 @@
 
                 if (!initData.success) throw new Error("Gagal inisiasi upload.");
 
-                // TAHAP 2: UPLOAD KE CLOUDFLARE R2
-                statusText.innerText = "Langkah 2/3: Mengirim video ke R2 (Mohon tunggu)...";
+                // TAHAP 2: UPLOAD (DIRECT PUT ke Cloudflare R2 - TANPA PROXY!)
+                statusText.innerText = "Langkah 2/3: Mengunggah video (Bergantung koneksi internet)...";
                 const uploadRes = await fetch(initData.upload_url, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': file.type
-                    },
+                    headers: { 'Content-Type': file.type },
                     body: file
                 });
 
-                if (!uploadRes.ok) throw new Error("Gagal mengunggah file ke R2.");
+                if (!uploadRes.ok) throw new Error("Gagal mengunggah file ke Cloudflare R2.");
 
-                // TAHAP 3: CONFIRM (Menyimpan file & Mengambil Owner Token)
-                statusText.innerText = "Langkah 3/3: Konfirmasi unggahan...";
+                // TAHAP 3: CONFIRM (Proxy kembali)
+                statusText.innerText = "Langkah 3/3: Menyelesaikan proses...";
                 const confirmUrl = encodeURIComponent('https://storage.to/api/upload/confirm');
                 const confirmRes = await fetch(`https://corsproxy.io/?${confirmUrl}`, {
                     method: 'POST',
@@ -156,27 +170,29 @@
 
                 if (confirmData.success) {
                     const fileId = confirmData.file.id;
-                    const ownerToken = confirmData.owner_token; // Mengambil Token Kepemilikan
+                    const ownerToken = confirmData.owner_token;
                     
-                    // 4. SIMPAN OWNER TOKEN DI BROWSER AGAR TIDAK HILANG
-                    let savedFiles = JSON.parse(localStorage.getItem('my_saved_files')) || [];
-                    savedFiles.push({
+                    // SIMPAN KE RIWAYAT LOKAL (Owner Token)
+                    let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
+                    savedFiles.unshift({
                         id: fileId,
                         name: file.name,
-                        owner_token: ownerToken,
-                        date: new Date().toISOString()
+                        size: confirmData.file.human_size || (file.size/1024/1024).toFixed(2)+' MB',
+                        owner_token: ownerToken
                     });
-                    localStorage.setItem('my_saved_files', JSON.stringify(savedFiles));
+                    localStorage.setItem('my_videy_files', JSON.stringify(savedFiles));
 
-                    // Tampilkan Link
+                    // Tampilkan Hasil
                     const currentDomain = window.location.origin + window.location.pathname;
                     const finalLink = `${currentDomain}?v=${fileId}`;
                     
                     statusText.classList.add('hidden');
                     resultBox.classList.remove('hidden');
                     shareLink.value = finalLink;
+                    
+                    renderHistory(); // Update Tabel
                 } else {
-                    throw new Error("Gagal menyelesaikan konfirmasi.");
+                    throw new Error("Gagal konfirmasi dari server.");
                 }
 
             } catch (error) {
@@ -190,6 +206,84 @@
             }
         }
 
+        // ==========================================
+        // FUNGSI MANAJEMEN RIWAYAT (HAPUS MENGGUNAKAN OWNER TOKEN)
+        // ==========================================
+        function renderHistory() {
+            const tableDiv = document.getElementById('historyTable');
+            if(!tableDiv) return;
+
+            let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
+            
+            if (savedFiles.length === 0) {
+                tableDiv.innerHTML = `<p class="text-sm text-gray-500 italic">Belum ada video yang diunggah.</p>`;
+                return;
+            }
+
+            let html = `
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 rounded-tl-lg">Nama File</th>
+                            <th scope="col" class="px-4 py-3">Ukuran</th>
+                            <th scope="col" class="px-4 py-3 rounded-tr-lg text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            savedFiles.forEach((f) => {
+                const currentDomain = window.location.origin + window.location.pathname;
+                const link = `${currentDomain}?v=${f.id}`;
+                html += `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900 truncate max-w-[150px]" title="${f.name}">
+                            <a href="${link}" target="_blank" class="text-blue-600 hover:underline">${f.name}</a>
+                        </td>
+                        <td class="px-4 py-3">${f.size}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="hapusVideo('${f.id}', '${f.owner_token}')" class="text-red-500 hover:text-red-700 font-semibold text-xs border border-red-200 hover:bg-red-50 px-3 py-1 rounded transition">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            tableDiv.innerHTML = html;
+        }
+
+        async function hapusVideo(fileId, ownerToken) {
+            if(!confirm("Yakin ingin menghapus video ini dari server permanen?")) return;
+
+            try {
+                const deleteUrl = encodeURIComponent(`https://storage.to/api/file/${fileId}`);
+                const res = await fetch(`https://corsproxy.io/?${deleteUrl}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Owner ${ownerToken}` // Hapus menggunakan Owner Token
+                    }
+                });
+                
+                if (res.ok) {
+                    // Hapus dari localStorage
+                    let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
+                    savedFiles = savedFiles.filter(f => f.id !== fileId);
+                    localStorage.setItem('my_videy_files', JSON.stringify(savedFiles));
+                    
+                    renderHistory(); // Refresh tabel
+                    alert("Video berhasil dihapus.");
+                } else {
+                    throw new Error("Gagal menghapus video (Coba lagi nanti).");
+                }
+            } catch(e) {
+                alert(e.message);
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UTILITIES
+        // ==========================================
         function copyLink() {
             const linkInput = document.getElementById('shareLink');
             linkInput.select();
@@ -199,7 +293,7 @@
 
         function copyCurrentUrl() {
             navigator.clipboard.writeText(window.location.href);
-            alert('Link video disalin!');
+            alert('Link video berhasil disalin!');
         }
     </script>
 </body>
