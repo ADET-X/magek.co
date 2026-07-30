@@ -14,9 +14,6 @@
             background: #000;
             overflow: hidden;
         }
-        video::-webkit-media-controls-enclosure {
-            overflow: hidden;
-        }
     </style>
 </head>
 <body class="bg-black text-white relative">
@@ -42,23 +39,20 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // Memutar video langsung via Direct Link Uguu.se (Bebas Iklan & Full Screen)
-            const videoUrl = `https://uguu.se/${videoId}`;
+            // Menggunakan halaman pemutar bersih Gofile
+            const videoUrl = `https://gofile.io/d/${videoId}`;
             appDiv.innerHTML = `
-                <video src="${videoUrl}" 
-                       controls 
-                       autoplay 
-                       playsinline 
-                       class="w-full h-full object-contain outline-none bg-black">
-                    Browser kamu tidak mendukung pemutar video HTML5.
-                </video>
+                <iframe src="${videoUrl}" 
+                        class="w-full h-full border-0 pt-12" 
+                        scrolling="no" frameborder="0" allowfullscreen>
+                </iframe>
             `;
         } else {
             // TAMPILKAN FORM UPLOAD
             appDiv.innerHTML = `
                 <div class="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl text-center m-4 relative z-40">
                     <h2 class="text-xl font-bold text-white mb-2">Upload Video</h2>
-                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk dibagikan tanpa iklan.</p>
+                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk dibagikan secara permanen.</p>
                     
                     <div class="py-10 px-4 border-2 border-dashed border-gray-700 rounded-xl bg-gray-950/50 mb-6 transition-all hover:border-blue-500 cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,7 +104,7 @@
 
             statusText.classList.remove('hidden', 'text-red-400');
             statusText.classList.add('text-gray-400');
-            statusText.innerText = "Mengunggah ke server... (Mohon tunggu)";
+            statusText.innerText = "Mengunggah ke Gofile... (Mohon tunggu)";
             uploadBtn.disabled = true;
 
             try {
@@ -127,7 +121,7 @@
                 try {
                     data = JSON.parse(resultText);
                 } catch (e) {
-                    throw new Error("Sistem Sibuk / Error Cloudflare: " + resultText.substring(0, 40));
+                    throw new Error("Error server: " + resultText.substring(0, 40));
                 }
                 
                 if (!data.success) {
@@ -145,7 +139,6 @@
             } catch (error) {
                 console.error(error);
                 statusText.innerText = "Error: " + error.message;
-                statusText.classList.add('text-gray-400');
                 statusText.classList.remove('text-gray-400');
                 statusText.classList.add('text-red-400');
             } finally {
