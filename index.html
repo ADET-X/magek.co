@@ -42,8 +42,8 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // Menggunakan Direct Link API Pixeldrain dengan parameter agar diizinkan diputar langsung
-            const videoUrl = `https://pixeldrain.com/api/file/${videoId}?download`;
+            // Memutar video langsung via Direct Link API Pixeldrain (Bebas Iklan & Full Screen)
+            const videoUrl = `https://pixeldrain.com/api/file/${videoId}`;
             appDiv.innerHTML = `
                 <video src="${videoUrl}" 
                        controls 
