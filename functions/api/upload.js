@@ -10,20 +10,12 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Token akun Gofile kamu
+    // Token akun Gofile kamu (otomatis menyimpan file ke akunmu)
     const gofileToken = 'dMwihfjFH7HvzJIxUn0wJ2xmyjCuOndM';
-    
-    // Folder ID Gofile kamu yang benar
-    const folderId = 'TUiIqk'; 
 
     const gofileForm = new FormData();
     gofileForm.append('file', file);
     gofileForm.append('token', gofileToken);
-    
-    // Memasukkan file langsung ke dalam folder Gofile kamu
-    if (folderId) {
-      gofileForm.append('folderId', folderId);
-    }
 
     const uploadRes = await fetch('https://upload.gofile.io/uploadfile', {
       method: 'POST',
