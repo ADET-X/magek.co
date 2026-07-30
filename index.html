@@ -39,8 +39,8 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // PERBAIKAN: Menggunakan Embed Resmi Pixeldrain (Bebas Iklan & Anti Error)
-            const videoUrl = `https://pixeldrain.com/e/${videoId}`;
+            // PERBAIKAN: Menggunakan format resmi Pixeldrain (?embed) dengan tampilan Full Layar
+            const videoUrl = `https://pixeldrain.com/u/${videoId}?embed`;
             appDiv.innerHTML = `
                 <iframe src="${videoUrl}" 
                         class="w-full h-full border-0" 
