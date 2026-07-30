@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videy Clone - Doodstream</title>
+    <!-- Tailwind CSS untuk tampilan minimalis -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- Container Utama -->
+    <div id="app" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md text-center">
+        <!-- Konten akan di-inject oleh JavaScript -->
+    </div>
+
+    <script>
+        // --- KONFIGURASI API DOODSTREAM ---
+        // API Key milikmu dimasukkan di sini
+        const DOOD_API_KEY = '156828yoh1omg61gsw0tgo'; 
+        
+        // Cek URL saat ini
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('v');
+        const appDiv = document.getElementById('app');
+
+        if (videoId) {
+            // JIKA ADA VIDEO ID DI URL -> TAMPILKAN PLAYER
+            appDiv.innerHTML = `
+                <h1 class="text-2xl font-bold mb-4">Mempersiapkan Video...</h1>
+                <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
+                    <iframe src="https://dood.to/e/${videoId}" 
+                            class="absolute top-0 left-0 w-full h-full border-0" 
+                            scrolling="no" frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="mt-6">
+                    <a href="/" class="text-blue-500 hover:underline">Upload Video Lainnya</a>
+                </div>
+            `;
+        } else {
+            // JIKA TIDAK ADA VIDEO ID -> TAMPILKAN FORM UPLOAD
+            appDiv.innerHTML = `
+                <h1 class="text-3xl font-bold mb-2">Upload Video</h1>
+                <p class="text-gray-500 mb-6">Pilih video untuk diunggah via Doodstream</p>
+                
+                <input type="file" id="fileInput" accept="video/*" class="mb-4 block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100" />
+                
+                <button id="uploadBtn" onclick="mulaiUpload()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 w-full font-bold">
+                    Upload Sekarang
+                </button>
+
+                <!-- Status Text -->
+                <p id="statusText" class="mt-4 text-sm text-gray-600 hidden"></p>
+                
+                <!-- Hasil Link -->
+                <div id="resultBox" class="mt-6 hidden bg-green-50 p-4 rounded border border-green-200">
+                    <p class="text-green-700 font-bold mb-2">Video Berhasil Diunggah!</p>
+                    <input type="text" id="shareLink" class="w-full p-2 border rounded" readonly />
+                    <button onclick="copyLink()" class="mt-2 text-sm text-blue-600 underline">Salin Link</button>
+                </div>
+            `;
+        }
+
+        // --- FUNGSI UPLOAD ---
+        async function mulaiUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const statusText = document.getElementById('statusText');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const resultBox = document.getElementById('resultBox');
+            const shareLink = document.getElementById('shareLink');
+
+            if (fileInput.files.length === 0) {
+                alert('Pilih video terlebih dahulu!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            statusText.classList.remove('hidden');
+            statusText.innerText = "1/2: Meminta akses server Doodstream...";
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50');
+
+            try {
+                // 1. Dapatkan URL Server Upload Doodstream menggunakan doodapi.co
+                const serverRes = await fetch(`https://doodapi.co/api/upload/server?key=${DOOD_API_KEY}`);
+                const serverData = await serverRes.json();
+                
+                if(serverData.msg !== "OK") throw new Error("Gagal mendapat server dari Doodstream");
+                const uploadUrl = serverData.result;
+
+                // 2. Upload file ke URL server yang diberikan Doodstream
+                statusText.innerText = "2/2: Mengunggah video... (Harap tunggu, proses ini bergantung pada ukuran video & kecepatan internet)";
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('api_key', DOOD_API_KEY);
+
+                const uploadRes = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+
+                if (uploadData.msg === "OK") {
+                    // Dapatkan ID Video dari Doodstream
+                    const fileCode = uploadData.result[0].file_code;
+                    
+                    // Buat link dinamis menggunakan domain GitHub Pages kamu
+                    const currentDomain = window.location.origin + window.location.pathname;
+                    const finalLink = `${currentDomain}?v=${fileCode}`;
+                    
+                    statusText.classList.add('hidden');
+                    resultBox.classList.remove('hidden');
+                    shareLink.value = finalLink;
+                } else {
+                    throw new Error("Upload gagal oleh server Doodstream.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Terjadi kesalahan: " + error.message;
+                statusText.classList.add('text-red-500');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('opacity-50');
+            }
+        }
+
+        // --- FUNGSI SALIN LINK ---
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            alert('Link berhasil disalin!');
+        }
+    </script>
+</body>
+</html>
 
