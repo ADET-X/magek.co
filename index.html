@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Videy Clone - Storage.to</title>
+    <title>Videy Clone - Cloudflare Pages</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col items-center p-4">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col items-center p-4">
 
     <!-- Navbar Minimalis -->
     <div class="w-full max-w-3xl mb-8 mt-4 flex justify-between items-center">
-        <h1 class="text-2xl font-extrabold tracking-tight">videy<span class="text-blue-600">clone</span></h1>
-        <a href="/" class="bg-white border hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-bold shadow-sm transition">Upload Baru</a>
+        <h1 class="text-2xl font-extrabold tracking-tight">videy<span class="text-blue-500">clone</span></h1>
+        <a href="/" class="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-bold transition">Upload Baru</a>
     </div>
 
     <!-- Container Utama -->
-    <div id="app" class="w-full max-w-3xl bg-white p-8 rounded-xl shadow-md text-center">
+    <div id="app" class="w-full max-w-3xl bg-gray-800 border border-gray-700 p-8 rounded-xl shadow-xl text-center">
         <!-- Konten di-inject via JS -->
     </div>
 
     <script>
-        // --- KONFIGURASI AUTENTIKASI ---
-        
-        // 1. Dapatkan atau Buat Visitor Token
+        // Token Pengunjung Anonim Aman (Disimpan di Browser)
         let visitorToken = localStorage.getItem('visitor_token');
         if (!visitorToken) {
             visitorToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -34,9 +32,7 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // ==========================================
             // TAMPILAN PEMUTAR VIDEO
-            // ==========================================
             appDiv.innerHTML = `
                 <div class="relative w-full rounded-lg overflow-hidden bg-black shadow-inner pb-[56.25%] h-0">
                     <iframe src="https://storage.to/${videoId}" 
@@ -51,51 +47,45 @@
                 </div>
             `;
         } else {
-            // ==========================================
-            // TAMPILAN FORM UPLOAD & RIWAYAT
-            // ==========================================
+            // TAMPILKAN FORM UPLOAD & RIWAYAT
             appDiv.innerHTML = `
-                <!-- Area Upload -->
-                <div class="py-10 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/50 mb-6 transition-all hover:bg-blue-50">
-                    <h2 class="mt-2 text-xl font-bold text-gray-700">Pilih Video</h2>
-                    <p class="text-sm text-gray-500 mb-4">Maksimal 50MB (Mode Anonim Aman)</p>
+                <div class="py-10 border-2 border-dashed border-gray-600 rounded-xl bg-gray-900/50 mb-6 transition-all hover:border-blue-500">
+                    <h2 class="mt-2 text-xl font-bold text-gray-200">Pilih Video</h2>
+                    <p class="text-sm text-gray-400 mb-4">Maksimal 50MB (Didukung Cloudflare CDN)</p>
                     
-                    <input type="file" id="fileInput" accept="video/mp4,video/webm" class="block w-full max-w-xs mx-auto text-sm text-gray-500
+                    <input type="file" id="fileInput" accept="video/mp4,video/webm" class="block w-full max-w-xs mx-auto text-sm text-gray-400
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
-                        file:bg-blue-100 file:text-blue-700
-                        hover:file:bg-blue-200 cursor-pointer" />
+                        file:bg-blue-600 file:text-white
+                        hover:file:bg-blue-700 cursor-pointer" />
                 </div>
                 
                 <button id="uploadBtn" onclick="mulaiUpload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 w-full font-bold transition-all text-lg shadow-md">
                     Upload Video Sekarang
                 </button>
 
-                <p id="statusText" class="mt-4 text-sm font-semibold text-gray-600 hidden"></p>
+                <p id="statusText" class="mt-4 text-sm font-semibold text-gray-400 hidden"></p>
                 
-                <div id="resultBox" class="mt-6 hidden bg-green-50 p-4 rounded-lg border border-green-200 text-left">
-                    <p class="text-green-800 font-bold mb-2">✅ Video Berhasil Diunggah!</p>
+                <div id="resultBox" class="mt-6 hidden bg-green-950/50 p-4 rounded-lg border border-green-800 text-left">
+                    <p class="text-green-400 font-bold mb-2">✅ Video Berhasil Diunggah!</p>
                     <div class="flex gap-2">
-                        <input type="text" id="shareLink" class="w-full p-2 border border-green-300 rounded bg-white text-gray-700 font-mono text-sm outline-none" readonly />
+                        <input type="text" id="shareLink" class="w-full p-2 border border-green-700 rounded bg-gray-900 text-green-300 font-mono text-sm outline-none" readonly />
                         <button onclick="copyLink()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-bold transition whitespace-nowrap shadow-sm">Salin</button>
                     </div>
                 </div>
 
-                <!-- Area Riwayat Video -->
+                <!-- Riwayat Video -->
                 <div class="mt-12 text-left">
-                    <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Riwayat Video Saya</h3>
+                    <h3 class="text-lg font-bold text-gray-200 border-b border-gray-700 pb-2 mb-4">Riwayat Video Saya</h3>
                     <div id="historyTable" class="overflow-x-auto">
-                        <!-- Tabel di-inject via JS renderHistory() -->
+                        <!-- Tabel Riwayat -->
                     </div>
                 </div>
             `;
             renderHistory();
         }
 
-        // ==========================================
-        // FUNGSI UPLOAD (3 TAHAP STORAGE.TO)
-        // ==========================================
         async function mulaiUpload() {
             const fileInput = document.getElementById('fileInput');
             const statusText = document.getElementById('statusText');
@@ -109,22 +99,20 @@
             }
 
             const file = fileInput.files[0];
-            
             if (file.size > 50 * 1024 * 1024) {
                 alert('Ukuran file maksimal 50MB.');
                 return;
             }
 
-            statusText.classList.remove('hidden', 'text-red-500');
-            statusText.classList.add('text-gray-600');
+            statusText.classList.remove('hidden', 'text-red-400');
+            statusText.classList.add('text-gray-400');
             uploadBtn.disabled = true;
             uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
             try {
-                // TAHAP 1: INIT (Menggunakan Proxy untuk hindari CORS Browser ke API Storage.to)
+                // TAHAP 1: INIT
                 statusText.innerText = "Langkah 1/3: Meminta akses server...";
-                const initUrl = encodeURIComponent('https://storage.to/api/upload/init');
-                const initRes = await fetch(`https://corsproxy.io/?${initUrl}`, {
+                const initRes = await fetch('https://storage.to/api/upload/init', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -137,23 +125,20 @@
                     })
                 });
                 const initData = await initRes.json();
-
                 if (!initData.success) throw new Error("Gagal inisiasi upload.");
 
-                // TAHAP 2: UPLOAD (DIRECT PUT ke Cloudflare R2 - TANPA PROXY!)
-                statusText.innerText = "Langkah 2/3: Mengunggah video (Bergantung koneksi internet)...";
+                // TAHAP 2: UPLOAD LANGSUNG KE R2
+                statusText.innerText = "Langkah 2/3: Mengunggah video ke Cloudflare R2...";
                 const uploadRes = await fetch(initData.upload_url, {
                     method: 'PUT',
                     headers: { 'Content-Type': file.type },
                     body: file
                 });
+                if (!uploadRes.ok) throw new Error("Gagal mengunggah file.");
 
-                if (!uploadRes.ok) throw new Error("Gagal mengunggah file ke Cloudflare R2.");
-
-                // TAHAP 3: CONFIRM (Proxy kembali)
+                // TAHAP 3: CONFIRM
                 statusText.innerText = "Langkah 3/3: Menyelesaikan proses...";
-                const confirmUrl = encodeURIComponent('https://storage.to/api/upload/confirm');
-                const confirmRes = await fetch(`https://corsproxy.io/?${confirmUrl}`, {
+                const confirmRes = await fetch('https://storage.to/api/upload/confirm', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -172,7 +157,6 @@
                     const fileId = confirmData.file.id;
                     const ownerToken = confirmData.owner_token;
                     
-                    // SIMPAN KE RIWAYAT LOKAL (Owner Token)
                     let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
                     savedFiles.unshift({
                         id: fileId,
@@ -182,15 +166,13 @@
                     });
                     localStorage.setItem('my_videy_files', JSON.stringify(savedFiles));
 
-                    // Tampilkan Hasil
                     const currentDomain = window.location.origin + window.location.pathname;
                     const finalLink = `${currentDomain}?v=${fileId}`;
                     
                     statusText.classList.add('hidden');
                     resultBox.classList.remove('hidden');
                     shareLink.value = finalLink;
-                    
-                    renderHistory(); // Update Tabel
+                    renderHistory();
                 } else {
                     throw new Error("Gagal konfirmasi dari server.");
                 }
@@ -198,35 +180,31 @@
             } catch (error) {
                 console.error(error);
                 statusText.innerText = "Error: " + error.message;
-                statusText.classList.remove('text-gray-600');
-                statusText.classList.add('text-red-500');
+                statusText.classList.remove('text-gray-400');
+                statusText.classList.add('text-red-400');
             } finally {
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
-        // ==========================================
-        // FUNGSI MANAJEMEN RIWAYAT (HAPUS MENGGUNAKAN OWNER TOKEN)
-        // ==========================================
         function renderHistory() {
             const tableDiv = document.getElementById('historyTable');
             if(!tableDiv) return;
 
             let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
-            
             if (savedFiles.length === 0) {
                 tableDiv.innerHTML = `<p class="text-sm text-gray-500 italic">Belum ada video yang diunggah.</p>`;
                 return;
             }
 
             let html = `
-                <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <table class="w-full text-sm text-left text-gray-400">
+                    <thead class="text-xs text-gray-300 uppercase bg-gray-700">
                         <tr>
-                            <th scope="col" class="px-4 py-3 rounded-tl-lg">Nama File</th>
-                            <th scope="col" class="px-4 py-3">Ukuran</th>
-                            <th scope="col" class="px-4 py-3 rounded-tr-lg text-right">Aksi</th>
+                            <th class="px-4 py-3 rounded-tl-lg">Nama File</th>
+                            <th class="px-4 py-3">Ukuran</th>
+                            <th class="px-4 py-3 rounded-tr-lg text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -236,13 +214,13 @@
                 const currentDomain = window.location.origin + window.location.pathname;
                 const link = `${currentDomain}?v=${f.id}`;
                 html += `
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900 truncate max-w-[150px]" title="${f.name}">
-                            <a href="${link}" target="_blank" class="text-blue-600 hover:underline">${f.name}</a>
+                    <tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-750">
+                        <td class="px-4 py-3 font-medium text-gray-200 truncate max-w-[150px]" title="${f.name}">
+                            <a href="${link}" target="_blank" class="text-blue-400 hover:underline">${f.name}</a>
                         </td>
                         <td class="px-4 py-3">${f.size}</td>
                         <td class="px-4 py-3 text-right">
-                            <button onclick="hapusVideo('${f.id}', '${f.owner_token}')" class="text-red-500 hover:text-red-700 font-semibold text-xs border border-red-200 hover:bg-red-50 px-3 py-1 rounded transition">
+                            <button onclick="hapusVideo('${f.id}', '${f.owner_token}')" class="text-red-400 hover:text-red-300 font-semibold text-xs border border-red-900 bg-red-950/40 hover:bg-red-900/40 px-3 py-1 rounded transition">
                                 Hapus
                             </button>
                         </td>
@@ -254,36 +232,26 @@
         }
 
         async function hapusVideo(fileId, ownerToken) {
-            if(!confirm("Yakin ingin menghapus video ini dari server permanen?")) return;
-
+            if(!confirm("Yakin ingin menghapus video ini?")) return;
             try {
-                const deleteUrl = encodeURIComponent(`https://storage.to/api/file/${fileId}`);
-                const res = await fetch(`https://corsproxy.io/?${deleteUrl}`, {
+                const res = await fetch(`https://storage.to/api/file/${fileId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Owner ${ownerToken}` // Hapus menggunakan Owner Token
-                    }
+                    headers: { 'Authorization': `Owner ${ownerToken}` }
                 });
-                
                 if (res.ok) {
-                    // Hapus dari localStorage
                     let savedFiles = JSON.parse(localStorage.getItem('my_videy_files')) || [];
                     savedFiles = savedFiles.filter(f => f.id !== fileId);
                     localStorage.setItem('my_videy_files', JSON.stringify(savedFiles));
-                    
-                    renderHistory(); // Refresh tabel
+                    renderHistory();
                     alert("Video berhasil dihapus.");
                 } else {
-                    throw new Error("Gagal menghapus video (Coba lagi nanti).");
+                    throw new Error("Gagal menghapus video.");
                 }
             } catch(e) {
                 alert(e.message);
             }
         }
 
-        // ==========================================
-        // FUNGSI UTILITIES
-        // ==========================================
         function copyLink() {
             const linkInput = document.getElementById('shareLink');
             linkInput.select();
@@ -293,7 +261,7 @@
 
         function copyCurrentUrl() {
             navigator.clipboard.writeText(window.location.href);
-            alert('Link video berhasil disalin!');
+            alert('Link video disalin!');
         }
     </script>
 </body>
