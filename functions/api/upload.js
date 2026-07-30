@@ -13,7 +13,6 @@ export async function onRequestPost(context) {
     // Token akun Gofile kamu
     const gofileToken = 'dMwihfjFH7HvzJIxUn0wJ2xmyjCuOndM';
 
-    // Kirim file ke Gofile beserta token akun
     const gofileForm = new FormData();
     gofileForm.append('file', file);
     gofileForm.append('token', gofileToken);
@@ -24,30 +23,30 @@ export async function onRequestPost(context) {
     });
 
     const resultText = await uploadRes.text();
+    
     let data;
     try {
       data = JSON.parse(resultText);
     } catch (e) {
-      return new Response(JSON.stringify({ success: false, error: 'Gagal merespons server Gofile' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Respon server bukan JSON: ' + resultText.substring(0, 80) }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
     if (data.status === 'ok' && data.data && data.data.code) {
-      const fileCode = data.data.code; // ID unik file dari Gofile
-      return new Response(JSON.stringify({ success: true, filecode: fileCode }), {
+      return new Response(JSON.stringify({ success: true, filecode: data.data.code }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      return new Response(JSON.stringify({ success: false, error: data.status || 'Gagal mengunggah ke Gofile' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Gofile menolak: ' + (data.status || JSON.stringify(data)) }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
+    return new Response(JSON.stringify({ success: false, error: 'Sistem Error: ' + err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
