@@ -14,10 +14,6 @@
             background: #000;
             overflow: hidden;
         }
-        /* Menyembunyikan tombol download bawaan browser jika diinginkan */
-        video::-webkit-media-controls-enclosure {
-            overflow:hidden;
-        }
     </style>
 </head>
 <body class="bg-black text-white relative">
@@ -43,16 +39,13 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // TAMPILAN VIDEO HTML5 MURNI BEBAS IKLAN (PIXELDRAIN API)
+            // PERBAIKAN: Menggunakan Embed Resmi Pixeldrain (Bebas Iklan & Anti Error)
             const videoUrl = `https://pixeldrain.com/e/${videoId}`;
             appDiv.innerHTML = `
-                <video src="${videoUrl}" 
-                       controls 
-                       autoplay 
-                       playsinline 
-                       class="w-full h-full object-contain outline-none bg-black">
-                    Browser kamu tidak mendukung pemutar video HTML5.
-                </video>
+                <iframe src="${videoUrl}" 
+                        class="w-full h-full border-0" 
+                        scrolling="no" frameborder="0" allowfullscreen>
+                </iframe>
             `;
         } else {
             // TAMPILKAN FORM UPLOAD
@@ -123,7 +116,13 @@
                     body: formData
                 });
                 
-                const data = await uploadRes.json();
+                const resultText = await uploadRes.text();
+                let data;
+                try {
+                    data = JSON.parse(resultText);
+                } catch (e) {
+                    throw new Error("Sistem Sibuk / Error Cloudflare: " + resultText.substring(0, 40));
+                }
                 
                 if (!data.success) {
                     throw new Error(data.error || "Gagal mengunggah.");
