@@ -10,37 +10,33 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Kirim file ke Uguu.se
-    const uguuForm = new FormData();
-    uguuForm.append('files[]', file);
+    // Menggunakan endpoint langsung Gofile
+    const gofileForm = new FormData();
+    gofileForm.append('file', file);
 
-    const response = await fetch('https://uguu.se/upload', {
+    const uploadRes = await fetch('https://upload.gofile.io/uploadfile', {
       method: 'POST',
-      body: uguuForm
+      body: gofileForm
     });
 
-    const resultText = await response.text();
+    const resultText = await uploadRes.text();
     let data;
-    
     try {
       data = JSON.parse(resultText);
     } catch (e) {
-      return new Response(JSON.stringify({ success: false, error: 'Gagal memproses server: ' + resultText.substring(0, 40) }), {
+      return new Response(JSON.stringify({ success: false, error: 'Gagal merespons server Gofile' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Uguu.se mengembalikan struktur JSON dengan array files
-    if (data.success && data.files && data.files.length > 0) {
-      const fileUrl = data.files[0].url; // Contoh: https://uguu.se/abc123XYZ.mp4
-      const fileCode = fileUrl.split('/').pop(); // Mengambil nama file akhirnya saja (abc123XYZ.mp4)
-      
+    if (data.status === 'ok' && data.data && data.data.code) {
+      const fileCode = data.data.code; // Mengambil ID unik file dari Gofile
       return new Response(JSON.stringify({ success: true, filecode: fileCode }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      return new Response(JSON.stringify({ success: false, error: 'Gagal mengunggah file ke Uguu' }), {
+      return new Response(JSON.stringify({ success: false, error: data.status || 'Gagal mengunggah ke Gofile' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
