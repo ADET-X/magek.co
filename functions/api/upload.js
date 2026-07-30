@@ -10,41 +10,28 @@ export async function onRequestPost(context) {
       });
     }
 
-    // API Key Doodstream milikmu yang aman di sisi server
-    const apiKey = '156828yoh1omg61gsw0tgo';
+    // API Key Pixeldrain milikmu yang aman di sisi server
+    const apiKey = '54e8830d-8b00-4544-9156-485a97354373';
+    const credentials = btoa('api:' + apiKey);
+    const fileName = file.name || 'video.mp4';
 
-    // 1. Minta URL server upload dari Doodstream
-    const serverRes = await fetch(`https://doodapi.co/api/upload/server?key=${apiKey}`);
-    const serverData = await serverRes.json();
-
-    if (serverData.msg !== "OK") {
-      return new Response(JSON.stringify({ success: false, error: 'Gagal mendapat server Doodstream' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const uploadUrl = serverData.result;
-
-    // 2. Teruskan file video ke server Doodstream
-    const doodForm = new FormData();
-    doodForm.append('api_key', apiKey);
-    doodForm.append('file', file);
-
-    const uploadRes = await fetch(uploadUrl, {
-      method: 'POST',
-      body: doodForm
+    // Pixeldrain menggunakan metode PUT dengan format kirim binary data
+    const response = await fetch(`https://pixeldrain.com/api/file/${encodeURIComponent(fileName)}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Basic ${credentials}`
+      },
+      body: file.stream()
     });
 
-    const uploadData = await uploadRes.json();
+    const data = await response.json();
 
-    if (uploadData.msg === "OK") {
-      const fileCode = uploadData.result[0].filecode;
-      return new Response(JSON.stringify({ success: true, filecode: fileCode }), {
+    if (data.success) {
+      return new Response(JSON.stringify({ success: true, filecode: data.id }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      return new Response(JSON.stringify({ success: false, error: 'Gagal upload ke Doodstream' }), {
+      return new Response(JSON.stringify({ success: false, error: data.value || 'Gagal upload ke Pixeldrain' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -57,4 +44,3 @@ export async function onRequestPost(context) {
     });
   }
 }
-
