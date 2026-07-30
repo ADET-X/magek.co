@@ -10,9 +10,13 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Menggunakan endpoint langsung Gofile
+    // Token akun Gofile kamu
+    const gofileToken = 'dMwihfjFH7HvzJIxUn0wJ2xmyjCuOndM';
+
+    // Kirim file ke Gofile beserta token akun
     const gofileForm = new FormData();
     gofileForm.append('file', file);
+    gofileForm.append('token', gofileToken);
 
     const uploadRes = await fetch('https://upload.gofile.io/uploadfile', {
       method: 'POST',
@@ -31,7 +35,7 @@ export async function onRequestPost(context) {
     }
 
     if (data.status === 'ok' && data.data && data.data.code) {
-      const fileCode = data.data.code; // Mengambil ID unik file dari Gofile
+      const fileCode = data.data.code; // ID unik file dari Gofile
       return new Response(JSON.stringify({ success: true, filecode: fileCode }), {
         headers: { 'Content-Type': 'application/json' }
       });
