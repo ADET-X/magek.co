@@ -10,41 +10,37 @@ export async function onRequestPost(context) {
       });
     }
 
-    // API Key Pixeldrain milikmu
-    const apiKey = '54e8830d-8b00-4544-9156-485a97354373';
-    const credentials = btoa('api:' + apiKey);
+    // Kirim file ke Uguu.se
+    const uguuForm = new FormData();
+    uguuForm.append('files[]', file);
 
-    // KUNCI PERBAIKAN: Gunakan FormData dan method POST (Sama seperti sistem Doodstream yang sukses sebelumnya)
-    const pdForm = new FormData();
-    pdForm.append('file', file);
-
-    const response = await fetch('https://pixeldrain.com/api/file', {
+    const response = await fetch('https://uguu.se/upload', {
       method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`
-      },
-      body: pdForm
+      body: uguuForm
     });
 
-    // Baca respons mentah agar Cloudflare tidak bingung jika Pixeldrain membalas string kosong
     const resultText = await response.text();
     let data;
     
     try {
       data = JSON.parse(resultText);
-    } catch(e) {
-      return new Response(JSON.stringify({ success: false, error: 'Server Pixeldrain error: ' + resultText.substring(0, 50) }), {
+    } catch (e) {
+      return new Response(JSON.stringify({ success: false, error: 'Gagal memproses server: ' + resultText.substring(0, 40) }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    if (data.success) {
-      return new Response(JSON.stringify({ success: true, filecode: data.id }), {
+    // Uguu.se mengembalikan struktur JSON dengan array files
+    if (data.success && data.files && data.files.length > 0) {
+      const fileUrl = data.files[0].url; // Contoh: https://uguu.se/abc123XYZ.mp4
+      const fileCode = fileUrl.split('/').pop(); // Mengambil nama file akhirnya saja (abc123XYZ.mp4)
+      
+      return new Response(JSON.stringify({ success: true, filecode: fileCode }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      return new Response(JSON.stringify({ success: false, error: data.value || data.message || 'Gagal dari Pixeldrain' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Gagal mengunggah file ke Uguu' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
