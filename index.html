@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Videy Clone</title>
+    <title>Videy Clone - Doodstream</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col items-center p-4">
@@ -25,14 +25,13 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // TAMPILKAN PEMUTAR VIDEO HTML5 ASLI (PERSIS VIDEY.CO)
-            const videoUrl = `https://files.catbox.moe/${videoId}`;
+            // TAMPILKAN PEMUTAR VIDEO DOODSTREAM (Iframe aman tanpa diblokir)
             appDiv.innerHTML = `
-                <div class="relative w-full rounded-lg overflow-hidden bg-black shadow-inner">
-                    <video controls autoplay playsinline class="w-full h-auto max-h-[70vh] mx-auto outline-none">
-                        <source src="${videoUrl}" type="video/mp4">
-                        Browser kamu tidak mendukung pemutar video HTML5.
-                    </video>
+                <div class="relative w-full rounded-lg overflow-hidden bg-black shadow-inner pb-[56.25%] h-0">
+                    <iframe src="https://dood.to/e/${videoId}" 
+                            class="absolute top-0 left-0 w-full h-full border-0" 
+                            scrolling="no" frameborder="0" allowfullscreen>
+                    </iframe>
                 </div>
                 <div class="mt-6 flex justify-center gap-4">
                     <button onclick="copyCurrentUrl()" class="bg-blue-600 text-white px-6 py-2 rounded-md font-bold hover:bg-blue-700 transition shadow-sm">
@@ -45,9 +44,9 @@
             appDiv.innerHTML = `
                 <div class="py-10 border-2 border-dashed border-gray-600 rounded-xl bg-gray-900/50 mb-6 transition-all hover:border-blue-500">
                     <h2 class="mt-2 text-xl font-bold text-gray-200">Pilih Video</h2>
-                    <p class="text-sm text-gray-400 mb-4">Maksimal 200MB (Format MP4/WebM)</p>
+                    <p class="text-sm text-gray-400 mb-4">Upload langsung ke Doodstream via Server</p>
                     
-                    <input type="file" id="fileInput" accept="video/mp4,video/webm" class="block w-full max-w-xs mx-auto text-sm text-gray-400
+                    <input type="file" id="fileInput" accept="video/*" class="block w-full max-w-xs mx-auto text-sm text-gray-400
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
@@ -56,7 +55,7 @@
                 </div>
                 
                 <button id="uploadBtn" onclick="mulaiUpload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 w-full font-bold transition-all text-lg shadow-md">
-                    Upload Video Sekarang
+                    Upload ke Doodstream
                 </button>
 
                 <p id="statusText" class="mt-4 text-sm font-semibold text-gray-400 hidden"></p>
@@ -84,43 +83,35 @@
             }
 
             const file = fileInput.files[0];
-            if (file.size > 200 * 1024 * 1024) {
-                alert('Ukuran file terlalu besar! Maksimal 200MB.');
-                return;
-            }
-
             statusText.classList.remove('hidden', 'text-red-400');
             statusText.classList.add('text-gray-400');
-            statusText.innerText = "Mengunggah video ke server... (Mohon tunggu)";
+            statusText.innerText = "Mengunggah video ke Doodstream (Mohon tunggu)...";
             uploadBtn.disabled = true;
             uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
             try {
                 const formData = new FormData();
-                formData.append('reqtype', 'fileupload');
-                formData.append('fileToUpload', file);
+                formData.append('file', file);
 
-                const targetUrl = encodeURIComponent('https://catbox.moe/user/api.php');
-                const uploadRes = await fetch(`https://corsproxy.io/?${targetUrl}`, {
+                // Kirim ke backend Cloudflare Pages Functions sendiri
+                const uploadRes = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 });
                 
-                if (!uploadRes.ok) throw new Error("Gagal mengunggah ke server.");
+                const data = await uploadRes.json();
                 
-                const responseText = await uploadRes.text(); 
-                
-                if (responseText.startsWith('http')) {
-                    const fileName = responseText.split('/').pop();
-                    const currentDomain = window.location.origin + window.location.pathname;
-                    const finalLink = `${currentDomain}?v=${fileName}`;
-                    
-                    statusText.classList.add('hidden');
-                    resultBox.classList.remove('hidden');
-                    shareLink.value = finalLink;
-                } else {
-                    throw new Error(responseText);
+                if (!data.success) {
+                    throw new Error(data.error || "Gagal mengunggah video.");
                 }
+                
+                const fileCode = data.filecode;
+                const currentDomain = window.location.origin + window.location.pathname;
+                const finalLink = `${currentDomain}?v=${fileCode}`;
+                
+                statusText.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+                shareLink.value = finalLink;
 
             } catch (error) {
                 console.error(error);
