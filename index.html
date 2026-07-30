@@ -42,8 +42,8 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // Memutar video langsung via Direct Link API Pixeldrain (Bebas Iklan & Full Screen)
-            const videoUrl = `https://pixeldrain.com/api/file/${videoId}`;
+            // Memutar video langsung via Direct Link Uguu.se (Bebas Iklan & Full Screen)
+            const videoUrl = `https://uguu.se/${videoId}`;
             appDiv.innerHTML = `
                 <video src="${videoUrl}" 
                        controls 
@@ -58,7 +58,7 @@
             appDiv.innerHTML = `
                 <div class="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl text-center m-4 relative z-40">
                     <h2 class="text-xl font-bold text-white mb-2">Upload Video</h2>
-                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk dibagikan tanpa iklan (via Pixeldrain).</p>
+                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk dibagikan tanpa iklan.</p>
                     
                     <div class="py-10 px-4 border-2 border-dashed border-gray-700 rounded-xl bg-gray-950/50 mb-6 transition-all hover:border-blue-500 cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,6 +145,7 @@
             } catch (error) {
                 console.error(error);
                 statusText.innerText = "Error: " + error.message;
+                statusText.classList.add('text-gray-400');
                 statusText.classList.remove('text-gray-400');
                 statusText.classList.add('text-red-400');
             } finally {
