@@ -26,7 +26,7 @@
             doods<span class="text-blue-500">adt</span>
         </a>
         <a href="/" class="bg-gray-800/80 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-gray-700 backdrop-blur shadow">
-            Upload Baru
+            Upload
         </a>
     </header>
 
@@ -43,7 +43,6 @@
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // MODE NONTON
             const videoUrl = `https://files.catbox.moe/${videoId}`;
             appDiv.innerHTML = `
                 <video src="${videoUrl}" 
@@ -55,11 +54,10 @@
                 </video>
             `;
         } else {
-            // MODE UPLOAD
             appDiv.innerHTML = `
                 <div class="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl text-center m-4 relative z-40">
                     <h2 class="text-xl font-bold text-white mb-2">Upload Video</h2>
-                    <p class="text-xs text-gray-400 mb-6">File masuk ke akun Catbox-mu (Maks 100MB untuk kestabilan).</p>
+                    <p class="text-xs text-gray-400 mb-6">File masuk ke akun Catbox-mu (Maksimal 50MB).</p>
                     
                     <div class="py-10 px-4 border-2 border-dashed border-gray-700 rounded-xl bg-gray-950/50 mb-6 transition-all hover:border-blue-500 cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,13 +120,12 @@
 
             const file = fileInput.files[0];
 
-            // ⚠️ PERHATIAN: Cloudflare Pages gratis membatasi payload di 100MB
-            if (file.size > 99 * 1024 * 1024) {
-                alert('Batas maksimal via proxy adalah 99MB! Silakan gunakan file lebih kecil.');
+            // ⚠️ Coba tes dengan video ukuran kecil dulu (contoh: di bawah 50MB) 
+            if (file.size > 50 * 1024 * 1024) {
+                alert('Untuk menghindari error server, batas maksimal sementara adalah 50MB!');
                 return;
             }
 
-            // Siapkan UI
             uploadBtn.disabled = true;
             resultBox.classList.add('hidden');
             progressContainer.classList.remove('hidden');
@@ -137,7 +134,6 @@
             progressText.innerText = 'Mengunggah ke server...';
             progressText.className = 'text-gray-400 text-xs font-semibold';
 
-            // Form persis seperti API Catbox
             const formData = new FormData();
             formData.append('reqtype', 'fileupload');
             formData.append('userhash', USER_HASH);
@@ -145,7 +141,6 @@
 
             const xhr = new XMLHttpRequest();
 
-            // Progress bar
             xhr.upload.addEventListener("progress", (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -153,12 +148,11 @@
                     progressPercent.innerText = percentComplete + '%';
                     
                     if (percentComplete === 100) {
-                        progressText.innerText = 'Meneruskan ke Catbox... (tunggu sebentar)';
+                        progressText.innerText = 'Menyimpan ke akun Catbox-mu...';
                     }
                 }
             });
 
-            // Selesai
             xhr.addEventListener("load", () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     const responseText = xhr.responseText.trim();
@@ -171,20 +165,21 @@
                         resultBox.classList.remove('hidden');
                         shareLink.value = finalUrl;
                     } else {
-                        showError("Gagal: " + responseText);
+                        // Jika Catbox menolak tapi bukan error sistem
+                        showError("Gagal: " + responseText.substring(0, 30));
                     }
                 } else {
-                    showError("Server error: " + xhr.responseText);
+                    // PENGAMAN: Hanya munculkan pesan pendek, jangan muntahkan kode HTML!
+                    showError(`Server Error (Kode: ${xhr.status}). Coba video yg lebih kecil.`);
                 }
                 uploadBtn.disabled = false;
             });
 
             xhr.addEventListener("error", () => {
-                showError("Koneksi terputus saat mengunggah.");
+                showError("Koneksi terputus! Cek internetmu.");
                 uploadBtn.disabled = false;
             });
 
-            // Tembak ke fungsi backend proxy kita (bukan ke Catbox langsung)
             xhr.open("POST", "/api/catbox", true);
             xhr.send(formData);
 
