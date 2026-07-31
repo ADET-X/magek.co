@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>doodsadt - Video Hosting</title>
+    <title>doodsadt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            overflow: hidden;
-        }
-        video::-webkit-media-controls-enclosure {
-            overflow: hidden;
-        }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body class="bg-black text-white relative">
 
+    <!-- Header -->
     <header class="absolute top-0 left-0 w-full flex justify-between items-center py-3 px-4 bg-gradient-to-b from-black/80 to-transparent z-50 pointer-events-auto">
         <a href="/" class="text-lg font-black tracking-wider text-white drop-shadow-md">
             doods<span class="text-blue-500">adt</span>
@@ -34,30 +26,26 @@
     </main>
 
     <script>
-        // === PENGATURAN AKUN CATBOX ===
-        const USER_HASH = 'c7f05658c770a3e71b59d6450';
-        // ==============================
+        // API KEY DOODSTREAM MILIKMU
+        const DOOD_API_KEY = '156828yoh1omg61gsw0tgo'; 
 
         const urlParams = new URLSearchParams(window.location.search);
-        const videoId = urlParams.get('v') || urlParams.get('id');
+        const videoId = urlParams.get('v');
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            const videoUrl = `https://files.catbox.moe/${videoId}`;
+            // MODE NONTON: Menampilkan Iframe Resmi Doodstream
             appDiv.innerHTML = `
-                <video src="${videoUrl}" 
-                       controls 
-                       autoplay 
-                       playsinline 
-                       class="w-full h-full object-contain outline-none bg-black">
-                    Browser kamu tidak mendukung pemutar video HTML5.
-                </video>
+                <iframe src="https://dood.to/e/${videoId}" 
+                        frameborder="0" scrolling="no" allowfullscreen>
+                </iframe>
             `;
         } else {
+            // MODE UPLOAD
             appDiv.innerHTML = `
                 <div class="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl text-center m-4 relative z-40">
-                    <h2 class="text-xl font-bold text-white mb-2">Upload Video</h2>
-                    <p class="text-xs text-gray-400 mb-6">File masuk ke akun Catbox-mu (Maksimal 50MB).</p>
+                    <h2 class="text-xl font-bold text-white mb-2">Upload Video Cepat</h2>
+                    <p class="text-xs text-gray-400 mb-6">File masuk ke akun Doodstream milikmu.</p>
                     
                     <div class="py-10 px-4 border-2 border-dashed border-gray-700 rounded-xl bg-gray-950/50 mb-6 transition-all hover:border-blue-500 cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,10 +60,9 @@
                         Upload Sekarang
                     </button>
 
-                    <!-- Progress Bar -->
                     <div id="progressContainer" class="hidden mt-5">
                         <div class="flex justify-between text-xs font-semibold text-gray-400 mb-1">
-                            <span id="progressText">Mengunggah...</span>
+                            <span id="progressText">Menghubungi server...</span>
                             <span id="progressPercent">0%</span>
                         </div>
                         <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
@@ -83,7 +70,6 @@
                         </div>
                     </div>
                     
-                    <!-- Hasil Upload -->
                     <div id="resultBox" class="hidden mt-5 bg-green-950/40 p-3 rounded-xl border border-green-800 text-left">
                         <p class="text-green-400 font-bold mb-1 text-xs">✅ Berhasil Diunggah!</p>
                         <div class="flex gap-2">
@@ -103,7 +89,7 @@
             }
         }
 
-        function mulaiUpload() {
+        async function mulaiUpload() {
             const fileInput = document.getElementById('fileInput');
             const uploadBtn = document.getElementById('uploadBtn');
             const progressContainer = document.getElementById('progressContainer');
@@ -117,77 +103,84 @@
                 alert('Pilih video terlebih dahulu!');
                 return;
             }
-
+            
             const file = fileInput.files[0];
-
-            // ⚠️ Coba tes dengan video ukuran kecil dulu (contoh: di bawah 50MB) 
-            if (file.size > 50 * 1024 * 1024) {
-                alert('Untuk menghindari error server, batas maksimal sementara adalah 50MB!');
-                return;
-            }
-
             uploadBtn.disabled = true;
             resultBox.classList.add('hidden');
             progressContainer.classList.remove('hidden');
             progressBar.style.width = '0%';
             progressPercent.innerText = '0%';
-            progressText.innerText = 'Mengunggah ke server...';
-            progressText.className = 'text-gray-400 text-xs font-semibold';
+            progressText.innerText = 'Meminta jalur khusus ke Doodstream...';
 
-            const formData = new FormData();
-            formData.append('reqtype', 'fileupload');
-            formData.append('userhash', USER_HASH);
-            formData.append('fileToUpload', file);
-
-            const xhr = new XMLHttpRequest();
-
-            xhr.upload.addEventListener("progress", (event) => {
-                if (event.lengthComputable) {
-                    const percentComplete = Math.round((event.loaded / event.total) * 100);
-                    progressBar.style.width = percentComplete + '%';
-                    progressPercent.innerText = percentComplete + '%';
-                    
-                    if (percentComplete === 100) {
-                        progressText.innerText = 'Menyimpan ke akun Catbox-mu...';
-                    }
+            try {
+                // Tahap 1: Minta URL server upload langsung ke Doodstream
+                const serverRes = await fetch(`https://doodapi.com/api/upload/server?key=${DOOD_API_KEY}`);
+                const serverData = await serverRes.json();
+                
+                if (serverData.status !== 200) {
+                    throw new Error("Gagal terhubung ke API Doodstream");
                 }
-            });
 
-            xhr.addEventListener("load", () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    const responseText = xhr.responseText.trim();
-                    
-                    if (responseText.startsWith('http')) {
-                        const fileCode = responseText.split('/').pop();
-                        const finalUrl = `${window.location.origin}${window.location.pathname}?v=${fileCode}`;
-                        
-                        progressContainer.classList.add('hidden');
-                        resultBox.classList.remove('hidden');
-                        shareLink.value = finalUrl;
+                const uploadUrl = serverData.result;
+                progressText.innerText = 'Mengunggah video secara langsung...';
+
+                // Tahap 2: Upload video menggunakan URL khusus tersebut (Lewat jalur tol)
+                const formData = new FormData();
+                formData.append('api_key', DOOD_API_KEY);
+                formData.append('file', file);
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener("progress", (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = Math.round((event.loaded / event.total) * 100);
+                        progressBar.style.width = percentComplete + '%';
+                        progressPercent.innerText = percentComplete + '%';
+                        if(percentComplete === 100) {
+                            progressText.innerText = 'Selesai! Doodstream sedang memproses video...';
+                        }
+                    }
+                });
+
+                xhr.addEventListener("load", () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.status === 200 && res.result && res.result.length > 0) {
+                                // Ambil ID video (filecode) dari Doodstream
+                                const fileCode = res.result[0].filecode;
+                                const finalUrl = `${window.location.origin}${window.location.pathname}?v=${fileCode}`;
+                                
+                                progressContainer.classList.add('hidden');
+                                resultBox.classList.remove('hidden');
+                                shareLink.value = finalUrl;
+                            } else {
+                                throw new Error("Gagal menyimpan video di akunmu.");
+                            }
+                        } catch (e) {
+                            progressText.innerText = "Error dari sistem Doodstream.";
+                        }
                     } else {
-                        // Jika Catbox menolak tapi bukan error sistem
-                        showError("Gagal: " + responseText.substring(0, 30));
+                        progressText.innerText = "Koneksi ditolak oleh server Doodstream.";
                     }
-                } else {
-                    // PENGAMAN: Hanya munculkan pesan pendek, jangan muntahkan kode HTML!
-                    showError(`Server Error (Kode: ${xhr.status}). Coba video yg lebih kecil.`);
-                }
-                uploadBtn.disabled = false;
-            });
+                    uploadBtn.disabled = false;
+                });
 
-            xhr.addEventListener("error", () => {
-                showError("Koneksi terputus! Cek internetmu.");
-                uploadBtn.disabled = false;
-            });
+                xhr.addEventListener("error", () => {
+                    progressText.innerText = "Koneksi internet terputus saat mengunggah.";
+                    uploadBtn.disabled = false;
+                });
 
-            xhr.open("POST", "/api/catbox", true);
-            xhr.send(formData);
+                // Tembak langsung tanpa perantara Cloudflare
+                xhr.open("POST", uploadUrl, true);
+                xhr.send(formData);
 
-            function showError(msg) {
-                progressText.innerText = msg;
-                progressText.className = 'text-red-400 text-xs font-semibold mt-1';
+            } catch (err) {
+                progressText.innerText = err.message;
+                progressText.className = "text-red-400 text-xs font-semibold mb-1";
                 progressBar.classList.remove('bg-blue-500');
                 progressBar.classList.add('bg-red-500');
+                uploadBtn.disabled = false;
             }
         }
 
