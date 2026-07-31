@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>doodsadt</title>
+    <title>doodsadt - Catbox</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body {
@@ -27,7 +27,7 @@
             doods<span class="text-blue-500">adt</span>
         </a>
         <a href="/" class="bg-gray-800/80 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-gray-700 backdrop-blur shadow">
-            Upload
+            Upload Baru
         </a>
     </header>
 
@@ -37,19 +37,13 @@
     </main>
 
     <script>
-        // ======= PENGATURAN CLOUDINARY =======
-        const CLOUD_NAME = 'qsycochl'; 
-        const UPLOAD_PRESET = 'doodsadt'; 
-        // =====================================
-
         const urlParams = new URLSearchParams(window.location.search);
         const videoId = urlParams.get('v') || urlParams.get('id');
         const appDiv = document.getElementById('app');
 
         if (videoId) {
-            // Memutar video langsung dari CDN super cepat Cloudinary
-            const videoUrl = `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/v1/${videoId}.mp4`;
-            
+            // Memutar video langsung via Direct Link Catbox (Permanen & Tanpa Iklan)
+            const videoUrl = `https://files.catbox.moe/${videoId}`;
             appDiv.innerHTML = `
                 <video src="${videoUrl}" 
                        controls 
@@ -63,8 +57,8 @@
             // TAMPILKAN FORM UPLOAD
             appDiv.innerHTML = `
                 <div class="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl text-center m-4 relative z-40">
-                    <h2 class="text-xl font-bold text-white mb-2">Upload Video Cepat</h2>
-                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk diunggah secara permanen (Maks 100MB).</p>
+                    <h2 class="text-xl font-bold text-white mb-2">Upload Video</h2>
+                    <p class="text-xs text-gray-400 mb-6">Pilih video untuk dibagikan secara permanen (Maks 200MB).</p>
                     
                     <div class="py-10 px-4 border-2 border-dashed border-gray-700 rounded-xl bg-gray-950/50 mb-6 transition-all hover:border-blue-500 cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,36 +108,36 @@
 
             const file = fileInput.files[0];
 
-            if (file.size > 100 * 1024 * 1024) {
-                alert('Ukuran video melebihi 100MB. Silakan kompres atau pilih video lain.');
-                return;
-            }
-
             statusText.style.display = 'block';
             statusText.className = "mt-4 text-xs font-semibold text-gray-400";
-            statusText.innerText = "Mengunggah langsung ke CDN... (Mohon tunggu sampai selesai)";
+            statusText.innerText = "Mengunggah video... (Mohon tunggu sampai selesai)";
             uploadBtn.disabled = true;
 
             try {
-                const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('upload_preset', UPLOAD_PRESET);
 
-                const uploadRes = await fetch(url, {
+                // Kita memanggil file backend upload.js yang ada di folder functions/api/
+                const uploadRes = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 });
                 
-                const data = await uploadRes.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message || "Gagal mengunggah ke Cloudinary.");
+                const resultText = await uploadRes.text();
+                let data;
+                try {
+                    data = JSON.parse(resultText);
+                } catch (e) {
+                    throw new Error("Respon server error: " + resultText.substring(0, 50));
                 }
                 
-                const publicId = data.public_id;
+                if (!data.success) {
+                    throw new Error(data.error || "Gagal mengunggah.");
+                }
+                
+                const fileCode = data.filecode;
                 const currentDomain = window.location.origin + window.location.pathname;
-                const finalLink = `${currentDomain}?v=${publicId}`;
+                const finalLink = `${currentDomain}?v=${fileCode}`;
                 
                 statusText.style.display = 'none';
                 resultBox.style.display = 'block';
