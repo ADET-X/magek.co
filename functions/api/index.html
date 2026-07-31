@@ -13,8 +13,11 @@ export async function onRequestPost(context) {
     // Persiapan data sesuai dokumentasi API Catbox
     const catboxForm = new FormData();
     catboxForm.append('reqtype', 'fileupload');
+    
+    // Memasukkan Userhash akun kamu agar video tersimpan di akunmu
+    catboxForm.append('userhash', 'c7f05658c770a3e71b59d6450');
+    
     catboxForm.append('fileToUpload', file);
-    // userhash tidak diisi agar upload menjadi anonymous
 
     // Kirim ke server Catbox
     const response = await fetch('https://catbox.moe/user/api.php', {
