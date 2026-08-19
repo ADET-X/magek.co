@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="watch full video hd">
+<meta property="og:title" content="watch full video hd">
+<meta property="og:description" content="watch full video hd">
+<title>Watch</title>
+
+<style>
+html,body{
+margin:0;
+padding:0;
+width:100%;
+height:100%;
+background:#000;
+overflow:hidden;
+}
+
+video{
+position:fixed;
+inset:0;
+width:100%;
+height:100%;
+object-fit:contain;
+background:#000;
+}
+
+/* fake play pas di tengah video */
+.play{
+position:fixed;
+top:48.5%;
+left:50%;
+transform:translate(-50%,-50%);
+width:72px;
+height:72px;
+border-radius:50%;
+background:rgba(255,255,255,.85);
+cursor:pointer;
+z-index:9999;
+transition:.2s;
+}
+
+/* icon segitiga */
+.play:before{
+content:"";
+position:absolute;
+top:50%;
+left:53%;
+transform:translate(-50%,-50%);
+border-left:22px solid rgba(0,0,0,.8);
+border-top:13px solid transparent;
+border-bottom:13px solid transparent;
+}
+
+/* efek klik */
+.play.hide{
+opacity:0;
+transform:translate(-50%,-50%) scale(.75);
+pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<video
+id="video"
+playsinline
+preload="metadata"
+controls
+></video>
+
+<div class="play" id="playBtn"></div>
+
+<script>
+const video = document.getElementById("video");
+const playBtn = document.getElementById("playBtn");
+
+(function(){
+
+const params = new URLSearchParams(location.search);
+
+let id = params.get("id");
+
+if(!id) return;
+
+if(!id.toLowerCase().endsWith(".mp4")){
+id += ".mp4";
+}
+
+/* video source */
+video.src = "https://cdn.videy.co/" + id;
+video.load();
+
+/* key unik */
+const redirectKey = "played_" + id;
+
+/* kalau sudah pernah klik */
+if(localStorage.getItem(redirectKey)){
+
+/* hilangkan fake play */
+playBtn.remove();
+
+return;
+}
+
+/* klik fake play */
+playBtn.onclick = ()=>{
+
+playBtn.classList.add("hide");
+
+/* simpan status */
+localStorage.setItem(redirectKey,"1");
+
+/* redirect */
+setTimeout(()=>{
+location.href = "https://s.shopee.co.id/3VjZwBmRUW";
+},200);
+
+};
+
+})();
+</script>
+
+</body>
+</html>
