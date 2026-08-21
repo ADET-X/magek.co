@@ -3,62 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="watch full video hd">
-<meta property="og:title" content="watch full video hd">
-<meta property="og:description" content="watch full video hd">
-<title>Watch</title>
+<title>Watch Full HD Video</title>
+
+<!-- Basic SEO Meta Tags -->
+<meta name="description" content="Watch Full HD Video">
+<meta name="keywords" content="video, hd, watch, online">
+<meta name="author" content="Video Player">
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="video.other">
+<meta property="og:title" content="Watch Full HD Video">
+<meta property="og:description" content="Watch Full HD Video">
+<meta property="og:site_name" content="Watch Full HD Video">
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Watch Full HD Video">
+<meta name="twitter:description" content="Watch Full HD Video">
 
 <style>
 html,body{
-margin:0;
-padding:0;
-width:100%;
-height:100%;
-background:#000;
-overflow:hidden;
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  overflow:hidden;
 }
 
 video{
-position:fixed;
-inset:0;
-width:100%;
-height:100%;
-object-fit:contain;
-background:#000;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
 }
 
 /* fake play pas di tengah video */
 .play{
-position:fixed;
-top:48.5%;
-left:50%;
-transform:translate(-50%,-50%);
-width:72px;
-height:72px;
-border-radius:50%;
-background:rgba(255,255,255,.85);
-cursor:pointer;
-z-index:9999;
-transition:.2s;
+  position:fixed;
+  top:48.5%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  background:rgba(255,255,255,.85);
+  cursor:pointer;
+  z-index:9999;
+  transition:.2s;
 }
 
 /* icon segitiga */
 .play:before{
-content:"";
-position:absolute;
-top:50%;
-left:53%;
-transform:translate(-50%,-50%);
-border-left:22px solid rgba(0,0,0,.8);
-border-top:13px solid transparent;
-border-bottom:13px solid transparent;
+  content:"";
+  position:absolute;
+  top:50%;
+  left:53%;
+  transform:translate(-50%,-50%);
+  border-left:22px solid rgba(0,0,0,.8);
+  border-top:13px solid transparent;
+  border-bottom:13px solid transparent;
 }
 
 /* efek klik */
 .play.hide{
-opacity:0;
-transform:translate(-50%,-50%) scale(.75);
-pointer-events:none;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.75);
+  pointer-events:none;
 }
 </style>
 </head>
@@ -66,10 +79,10 @@ pointer-events:none;
 <body>
 
 <video
-id="video"
-playsinline
-preload="metadata"
-controls
+  id="video"
+  playsinline
+  preload="metadata"
+  controls
 ></video>
 
 <div class="play" id="playBtn"></div>
@@ -80,46 +93,46 @@ const playBtn = document.getElementById("playBtn");
 
 (function(){
 
-const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search);
+  let id = params.get("id");
 
-let id = params.get("id");
+  if(!id) return;
 
-if(!id) return;
+  if(!id.toLowerCase().endsWith(".mp4")){
+    id += ".mp4";
+  }
 
-if(!id.toLowerCase().endsWith(".mp4")){
-id += ".mp4";
-}
+  /* video source */
+  video.src = "https://cdn.videy.co/" + id;
+  video.load();
 
-/* video source */
-video.src = "https://cdn.videy.co/" + id;
-video.load();
+  /* key unik */
+  const redirectKey = "played_" + id;
 
-/* key unik */
-const redirectKey = "played_" + id;
+  /* kalau sudah pernah klik */
+  if(localStorage.getItem(redirectKey)){
+    /* Sembunyikan saja, jangan di-remove agar bisa dipanggil lagi nanti */
+    playBtn.classList.add("hide");
+  }
 
-/* kalau sudah pernah klik */
-if(localStorage.getItem(redirectKey)){
+  /* klik fake play */
+  playBtn.onclick = ()=>{
+    playBtn.classList.add("hide");
 
-/* hilangkan fake play */
-playBtn.remove();
+    /* simpan status */
+    localStorage.setItem(redirectKey,"1");
 
-return;
-}
+    /* redirect */
+    setTimeout(()=>{
+      location.href = "https://s.shopee.co.id/2Vr5hqo7SH";
+    },200);
+  };
 
-/* klik fake play */
-playBtn.onclick = ()=>{
-
-playBtn.classList.add("hide");
-
-/* simpan status */
-localStorage.setItem(redirectKey,"1");
-
-/* redirect */
-setTimeout(()=>{
-location.href = "https://s.shopee.co.id/1VyX9rR2pR";
-},200);
-
-};
+  /* Event deteksi ketika video selesai/habis */
+  video.addEventListener("ended", ()=>{
+    /* Munculkan kembali fake play nya */
+    playBtn.classList.remove("hide");
+  });
 
 })();
 </script>
