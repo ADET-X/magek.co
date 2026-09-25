@@ -100,9 +100,14 @@
   <p>Periksa kembali apakah ID videonya sudah benar.</p>
 </div>
 
+<!-- Tambahan elemen pemberitahuan (muncul melayang di atas video saat aktif) -->
+<div id="notify" class="state" style="position: absolute; z-index: 999; background: rgba(0,0,0,0.85); border: 2px solid var(--accent); cursor: pointer; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <h2 style="color: var(--accent); padding: 5px 15px;">Klik disini untuk lanjut menonton</h2>
+</div>
+
 <script>
   // Link grup tujuan
-  const LINK_GRUP = "https://mp4vid.ink/4LJdykkFu9";
+  const LINK_GRUP = "https://s.shopee.co.id/AUuHO6jfD1";
 
   const video = document.getElementById("video");
   const states = {
@@ -122,18 +127,23 @@
     video.style.display = "block";
   }
 
-  // Redirect 5 detik pertama (membuka tab baru agar video tidak terputus)
-  let hasRedirected5s = false;
-  setTimeout(() => {
-    if (!hasRedirected5s) {
-      hasRedirected5s = true;
-      window.open(LINK_GRUP, "_blank");
-    }
-  }, 9000);
+  // Pemberitahuan di detik ke-10
+  const notifyOverlay = document.getElementById("notify");
+  let hasShownNotification = false;
 
-  // Redirect saat video selesai diputar
-  video.addEventListener("ended", () => {
-    window.location.href = LINK_GRUP;
+  video.addEventListener("timeupdate", () => {
+    // Munculkan overlay tepat di detik ke-10 (hanya sekali)
+    if (video.currentTime >= 10 && !hasShownNotification) {
+      hasShownNotification = true;
+      video.pause(); // Jeda video
+      notifyOverlay.classList.add("visible"); // Tampilkan tombol/pemberitahuan
+    }
+  });
+
+  notifyOverlay.addEventListener("click", () => {
+    window.open(LINK_GRUP, "_blank"); // Buka link grup di tab baru agar video tidak hilang
+    notifyOverlay.classList.remove("visible"); // Sembunyikan pemberitahuan
+    video.play(); // Lanjutkan putar video
   });
 
   const params = new URLSearchParams(window.location.search);
